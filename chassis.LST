@@ -1,0 +1,180 @@
+C51 COMPILER V7.06   CHASSIS                                                               01/01/2018 13:18:18 PAGE 1   
+
+
+C51 COMPILER V7.06, COMPILATION OF MODULE CHASSIS
+OBJECT MODULE PLACED IN chassis.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE chassis.c BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include <STC89C5xRC.H>
+   2          
+   3          void delay_ms(unsigned int n_ms)
+   4          {
+   5   1              unsigned int i,j;
+   6   1      
+   7   1              for(i=n_ms; i>0; i--)
+   8   1                      for(j=110; j>0; j--)
+   9   1                              ;
+  10   1      }
+  11          
+  12          void stop()
+  13          {
+  14   1              P1 = P1 & 0xF0; 
+  15   1              P2 = P2 & 0xF0;
+  16   1      }
+  17          
+  18          void forward_ms(unsigned int n_ms)
+  19          {
+  20   1              stop(); 
+  21   1              P1 = P1 | 0x09; 
+  22   1              P2 = P2 | 0x06;
+  23   1              delay_ms(n_ms);
+  24   1              stop();
+  25   1      }
+  26          
+  27          void backward_ms(unsigned int n_ms)
+  28          {
+  29   1              stop(); 
+  30   1              P1 = P1 | 0x06; 
+  31   1              P2 = P2 | 0x09;
+  32   1              delay_ms(n_ms);
+  33   1              stop();
+  34   1      }
+  35          
+  36          void left_ms(unsigned int n_ms)
+  37          {
+  38   1              stop(); 
+  39   1              P1 = P1 | 0x0A; 
+  40   1              P2 = P2 | 0x0A;
+  41   1              delay_ms(n_ms);
+  42   1              stop();
+  43   1      }
+  44          
+  45          void right_ms(unsigned int n_ms)
+  46          {
+  47   1              stop(); 
+  48   1              P1 = P1 | 0x05; 
+  49   1              P2 = P2 | 0x05;
+  50   1              delay_ms(n_ms);
+  51   1              stop();
+  52   1      }
+  53          
+  54          void led_color(char color)
+  55          {
+C51 COMPILER V7.06   CHASSIS                                                               01/01/2018 13:18:18 PAGE 2   
+
+  56   1              switch (color)
+  57   1              {
+  58   2                      case 'r':
+  59   2                              P24 = 1;
+  60   2                              P25 = 0;
+  61   2                              P26 = 0;                        
+  62   2                              break;
+  63   2                      case 'g':
+  64   2                              P24 = 0;
+  65   2                              P25 = 1;
+  66   2                              P26 = 0;                        
+  67   2                              break;
+  68   2                      case 'b':
+  69   2                              P24 = 0;
+  70   2                              P25 = 0;
+  71   2                              P26 = 1;                        
+  72   2                              break;
+  73   2                      case 'k':
+  74   2                              P24 = 0;
+  75   2                              P25 = 0;
+  76   2                              P26 = 0;                        
+  77   2                              break;
+  78   2                      default:
+  79   2                              P24 = 1;
+  80   2                              P25 = 1;
+  81   2                              P26 = 1;                        
+  82   2                              break;
+  83   2              }
+  84   1      }
+  85          
+  86          void init()
+  87          {
+  88   1              TMOD=0x20;
+  89   1              TH1=0xfd;
+  90   1              TL1=0xfd;
+  91   1              TR1=1;
+  92   1              REN=1;
+  93   1              SM0=0;
+  94   1              SM1=1;  
+  95   1              EA=1;
+  96   1              ES=1;   
+  97   1      }
+  98          
+  99          unsigned char flag,a,i;
+ 100          unsigned char code table[]="\nI get ";
+ 101          
+ 102          void main()
+ 103          {
+ 104   1      
+ 105   1              init();
+ 106   1      
+ 107   1              while(1)
+ 108   1              {
+ 109   2                      if(flag==1)
+ 110   2                      {
+ 111   3                              ES=0;
+ 112   3                              for(i=0;i<7;i++)
+ 113   3                              {
+ 114   4                                      SBUF=table[i];
+ 115   4                                      while(!TI);
+ 116   4                                      TI=0;
+ 117   4                              }
+C51 COMPILER V7.06   CHASSIS                                                               01/01/2018 13:18:18 PAGE 3   
+
+ 118   3                              SBUF=a;
+ 119   3                              while(!TI);
+ 120   3                              TI=0;
+ 121   3                              ES=1;
+ 122   3                              flag=0;
+ 123   3      
+ 124   3                              switch(a)
+ 125   3                              {
+ 126   4                                      case 'F':
+ 127   4                                              forward_ms(1000);
+ 128   4                                              led_color('g');
+ 129   4                                              break;
+ 130   4                                      case 'B':
+ 131   4                                              backward_ms(1000);
+ 132   4                                              led_color('r');
+ 133   4                                              break;
+ 134   4                                      case 'L':
+ 135   4                                              left_ms(360);
+ 136   4                                              led_color('b');
+ 137   4                                              break;
+ 138   4                                      case 'R':
+ 139   4                                              right_ms(360);
+ 140   4                                              led_color('b');
+ 141   4                                              break;
+ 142   4                              }
+ 143   3                      }
+ 144   2              }
+ 145   1      }
+ 146          
+ 147          void ser() interrupt 4
+ 148          {
+ 149   1              RI=0;
+ 150   1              a=SBUF;
+ 151   1              flag=1;
+ 152   1      }
+ 153          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    291    ----
+   CONSTANT SIZE    =      8    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
